@@ -7,30 +7,32 @@ permissions:
   pull-requests: write
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       website-url:
         type: string
         required: true
+      depth:
+        type: number
+        required: true
+      max-depth:
+        type: number
+        required: true
       base-branch:
         type: string
         required: true
-      depth:
-        type: number
-        default: 0
-      previous-file:
-        type: string
-        required: false
-        description: Filename containing markdown content from previous regression step
     secrets:
       key:
         required: true
       GH_TOKEN:
         required: true
+    outputs:
+      results:
+        value: ${{ jobs.get-results.outputs.results }}
 
 jobs:
   gather-markdown-files:
-    name: Setup Test Matrix (./testdriver/generate/*.md)
+    name: Get new markdown files (./testdriver/generate/*.md)
     runs-on: ubuntu-latest
     outputs:
       markdown_files: ${{ steps.markdown_list.outputs.files }}
@@ -43,13 +45,14 @@ jobs:
       - name: Find all markdown files and extract filenames
         id: markdown_list
         run: |
-          FILES=$(ls ./testdriver/generate/*.md)
-          FILENAMES=$(basename -a $FILES | sed 's/\.md$//')
+          # Get list of .md files changed in the last commit
+          FILES=$(git show --name-only --format= | grep "^testdriver/generate/.*\.md$" || true)
+          FILENAMES=$(echo "$FILES" | while IFS= read -r file; do basename "$file" .md; done)
           FILES_JSON=$(echo "$FILENAMES" | jq -R -s -c 'split("\n")[:-1]')
-          echo "::set-output name=files::$FILES_JSON"
+          echo "files=$FILES_JSON" >> $GITHUB_OUTPUT
 
   test:
-    name: Run Regressions - ${{ matrix.markdown }}
+    name: Generate Test - ${{ matrix.markdown }}
     needs: gather-markdown-files
     runs-on: ubuntu-latest
     strategy:
@@ -73,48 +76,86 @@ jobs:
       - id: generate-filename
         name: Generate Random Short Filename
         shell: bash
-        run: echo "filename=$(echo ${{ github.run_id }}-${{ github.run_attempt }}-$(( RANDOM % 10000 ))).yml" >> $GITHUB_OUTPUT
+        run:
+          echo "filename=${{ matrix.markdown }}_${{ github.run_id }}_${{ github.run_attempt }}.yml" >>
+          $GITHUB_OUTPUT
+      - id: generate-pr-branch
+        name: Generate PR Branch Name
+        shell: bash
+        run:
+          echo "pr-branch=testdriver/regression-${{ matrix.markdown }}-${{ github.run_id }}-${{
+          github.run_attempt }}" >> $GITHUB_OUTPUT
 
       - name: Run AI Regression Test
         uses: testdriverai/action@main
         continue-on-error: true
         with:
-          key: ${{ secrets.TESTDRIVER_API_KEY }}
+          key: ${{ secrets.key }}
           prompt: |
-            ${{ inputs.previous-file && format('1. /run {0}', inputs.previous-file) || '' }}
             ${{ env.MARKDOWN_CONTENT }}
             1. /summarize
           prerun: |
+            yarn global add https://github.com/testdriverai/testdriverai#yassine/embed-tests
             cd $env:TEMP
             npm init -y
             npm install dashcam-chrome
-            Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized", "--load-extension=$(pwd)/node_modules/dashcam-chrome/build", "${{ inputs.website-url }}"
+            Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized","--load-extension=$(pwd)/node_modules/dashcam-chrome/build","${{ inputs.website-url }}"
             exit
           create-pr: true
           branch: ${{ inputs.base-branch }}
           pr-base: ${{ inputs.base-branch }}
           pr-title: "TestDriver.ai / Run Regression / ${{ matrix.markdown }}"
-          pr-branch: testdriver/regression-${{ matrix.markdown }}-${{ github.run_id }}-${{ github.run_attempt }}
+          pr-branch: ${{ steps.generate-pr-branch.outputs.pr-branch }}
           pr-test-filename: ${{steps.generate-filename.outputs.filename}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORCE_COLOR: "3"
 
-      - name: Trigger Next-Level Exploratory Workflow
-        if: inputs.depth < 2
-        uses: actions/github-script@v6
+      - id: matrix
+        run: |
+          matrix="{\"markdown\": \"${{ matrix.markdown }}\", \"branch\": \"${{ steps.generate-pr-branch.outputs.pr-branch }}\", \"filename\": \"${{ steps.generate-filename.outputs.filename }}\"}"
+          echo "$matrix" > matrix
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: ${{ hashFiles('matrix') || 'none' }}
+          path: matrix
+          if-no-files-found: warn
+
+  get-results:
+    if: ${{inputs.depth != inputs.max-depth}}
+    name: Get Results
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      results: ${{ steps.get-results.outputs.results }}
+    steps:
+      - uses: actions/download-artifact@v4
+      - id: get-results
+        run: |
+          matrix="$(cat */matrix | jq -c --slurp .)"
+          echo "results: $matrix"
+          echo "results=$matrix" >> $GITHUB_OUTPUT
+      - name: Delete Artifact
+        uses: actions/github-script@v7
+        with:
           script: |
-            await github.rest.actions.createWorkflowDispatch({
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: "generate-exploratory.yml",
-              ref: context.ref,
-              inputs: {
-                "website-url": "${{ inputs.website-url }}",
-                "base-branch": "testdriver/regression-${{ matrix.markdown }}-${{ github.run_id }}-${{ github.run_attempt }}",
-                "previous-file": "${{ steps.generate-filename.outputs.filename }}",
-                depth: "${{ inputs.depth }}"
-              }
-            });
+              run_id: ${{ toJson(github.run_id) }}
+            }).then(r => r.data.artifacts);
+
+            console.log({ artifacts });
+
+            for(const artifact of artifacts) {
+              github.rest.actions.deleteArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: artifact.id
+              });
+            }
+
+
+  
