@@ -31,6 +31,10 @@ on:
         required: true
       GH_TOKEN:
         required: true
+      LOGIN_USERNAME:
+        description: The username to use for login
+      LOGIN_PASSWORD:
+        description: The password to use for login
     outputs:
       pr-branch:
         value: ${{ jobs.exploratory.outputs.pr-branch }}
@@ -47,13 +51,42 @@ jobs:
         shell: bash
         run: echo "pr-branch=testdriver/exploratory-${{ github.run_id }}-${{ github.run_attempt }}" >> $GITHUB_OUTPUT
 
+      - uses: "actions/github-script@v6"
+        id: create-prompt
+        env:
+          DEPTH: ${{ inputs.depth }}
+          PREVIOUS_FILE: ${{ inputs.previous-file }}
+          LOGIN_USERNAME: ${{ secrets.LOGIN_USERNAME }}
+          LOGIN_PASSWORD: ${{ secrets.LOGIN_PASSWORD }}
+        with:
+          script: |
+            const depth = parseInt(process.env.DEPTH)
+            const username = process.env.LOGIN_USERNAME
+            const password = process.env.LOGIN_PASSWORD
+            let loginFile = depth === 1 && username && password ? 'login.yml' : ''
+            let previousFile = loginFile || process.env.PREVIOUS_FILE
+
+            let instructions = [
+              `/generate web 3${previousFile ? ` testdriver/${previousFile}` : ''}`,
+              "/summarize"
+            ]
+              
+            if(loginFile) {
+              instructions = [
+                `login with username "${username}" and password "${password}"`,
+                `/save testdriver/${loginFile}`,
+                ...instructions,
+              ]
+            }
+            const prompt = instructions.map((instruction, i) => `${i + 1}. ${instruction}`).join("\n")
+            console.log(prompt)
+            return prompt
+
       - uses: testdriverai/action@main
         continue-on-error: true
         with:
           key: ${{ secrets.key }}
-          prompt: |
-            1. /generate web 3 ${{ inputs.previous-file && format('testdriver/{0}', inputs.previous-file) || '' }}
-            2. /summarize
+          prompt: ${{ fromJson(steps.create-prompt.outputs.result) }}
           prerun: |
             yarn global add https://github.com/testdriverai/testdriverai#yassine/embed-tests
             cd $env:TEMP
