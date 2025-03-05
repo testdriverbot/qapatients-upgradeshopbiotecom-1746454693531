@@ -51,7 +51,7 @@ jobs:
         shell: bash
         run: echo "pr-branch=testdriver/exploratory-${{ github.run_id }}-${{ github.run_attempt }}" >> $GITHUB_OUTPUT
 
-      - uses: "actions/github-script@v6"
+      - uses: 'actions/github-script@v6'
         id: create-prompt
         env:
           DEPTH: ${{ inputs.depth }}
@@ -67,7 +67,7 @@ jobs:
             let previousFile = loginFile || process.env.PREVIOUS_FILE
 
             let instructions = [
-              `/generate web 3${previousFile ? ` testdriver/${previousFile}` : ''}`,
+              `/generate web 3${previousFile ? ` testdriver/${previousFile} --skip-yaml` : ''}`,
               "/summarize"
             ]
               
@@ -96,8 +96,8 @@ jobs:
             exit
           create-pr: true
           pr-base: ${{ inputs.base-branch }}
-          pr-title: "TestDriver.ai / Generate Test Plans - Depth ${{ inputs.depth }}/${{ inputs.max-depth }}"
+          pr-title: 'TestDriver.ai / Generate Test Plans - Depth ${{ inputs.depth }}/${{ inputs.max-depth }}'
           pr-branch: ${{ steps.create-pr-branch.outputs.pr-branch }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FORCE_COLOR: "3"
+          FORCE_COLOR: '3'
