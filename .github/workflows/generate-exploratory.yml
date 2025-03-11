@@ -27,7 +27,7 @@ on:
         required: false
         description: Filename containing markdown content from previous regression step
     secrets:
-      key:
+      TESTDRIVER_API_KEY:
         required: true
       GH_TOKEN:
         required: true
