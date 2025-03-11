@@ -1,0 +1,31 @@
+name: TestDriver.ai
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+    contents: read # To allow the action to read repository contents
+    pull-requests: write # To allow the action to create/update pull request comments
+
+jobs:
+  test:
+    name: "TestDriver"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: testdriverai/action@main
+        with:
+          key: ${{secrets.TESTDRIVER_API_KEY}}
+          prerun: |
+            npm install
+            npm run build
+            npm install dashcam-chrome
+            Start-Process "C:/Program Files/Google/Chrome/Application/chrome.exe" -ArgumentList "--start-maximized","--load-extension=$(pwd)/node_modules/dashcam-chrome/build", "https://testdriverai.github.io/example-vite-recipe/"
+            Start-Sleep -Seconds 5
+          prompt: |
+            1. add pizza recipe to the recipe book and verify it is added
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORCE_COLOR: "3"
