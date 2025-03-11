@@ -40,7 +40,7 @@ jobs:
       base-branch: ${{ github.ref_name }}
       previous-file: ${{ inputs.previous-file }}
     secrets:
-      key: ${{ secrets.TESTDRIVER_API_KEY }}
+      TESTDRIVER_API_KEY: ${{ secrets.TESTDRIVER_API_KEY }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       LOGIN_USERNAME: ${{ secrets.LOGIN_USERNAME }}
       LOGIN_PASSWORD: ${{ secrets.LOGIN_PASSWORD }}
@@ -54,7 +54,7 @@ jobs:
       website-url: ${{ vars.TESTDRIVER_WEBSITE }}
       base-branch: ${{ needs.generate-exploratory.outputs.pr-branch }}
     secrets:
-      key: ${{ secrets.TESTDRIVER_API_KEY }}
+      TESTDRIVER_API_KEY: ${{ secrets.TESTDRIVER_API_KEY }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   generate-next-depth:
@@ -73,7 +73,7 @@ jobs:
           github-token: ${{ secrets.GH_PAT_TOKEN }}
           script: |
             const results = [];
-            
+
             for (const item of JSON.parse(process.env.RESULTS)) {
               // Check if branch exists
               const branchExists = await github.rest.repos.getBranch({
@@ -117,7 +117,7 @@ jobs:
               });
             }
             require('fs').writeFileSync('results.json', JSON.stringify(results, null, 2));
-            
+
       - name: Upload Results
         uses: actions/upload-artifact@v4
         with:

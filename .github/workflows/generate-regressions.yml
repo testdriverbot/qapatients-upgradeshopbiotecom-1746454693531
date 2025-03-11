@@ -22,7 +22,7 @@ on:
         type: string
         required: true
     secrets:
-      key:
+      TESTDRIVER_API_KEY:
         required: true
       GH_TOKEN:
         required: true
@@ -90,7 +90,7 @@ jobs:
         uses: testdriverai/action@main
         continue-on-error: true
         with:
-          key: ${{ secrets.key }}
+          key: ${{ secrets.TESTDRIVER_API_KEY }}
           prompt: |
             ${{ env.MARKDOWN_CONTENT }}
             1. /summarize
@@ -156,6 +156,3 @@ jobs:
                 artifact_id: artifact.id
               });
             }
-
-
-  
