@@ -43,6 +43,10 @@ on:
         required: true
       GH_TOKEN:
         required: true
+      LOGIN_USERNAME:
+        required: false
+      LOGIN_PASSWORD:
+        required: false
 
 jobs:
   match-dispatchId:
