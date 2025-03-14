@@ -39,9 +39,6 @@ on:
         type: string
         description: Previous test yaml file to use as a base
 
-env:
-  TESTDRIVER_WEBSITE: ${{ inputs.website-url && inputs.website-url || vars.TESTDRIVER_WEBSITE }}
-
 jobs:
   match-dispatchId:
     if: ${{ inputs.dispatchId }}
@@ -57,7 +54,7 @@ jobs:
     with:
       depth: ${{ fromJson(inputs.depth) }}
       max-depth: ${{ fromJson(inputs.max-depth) }}
-      website-url: ${{ env.TESTDRIVER_WEBSITE }}
+      website-url: ${{ inputs.website-url }}
       base-branch: ${{ github.ref_name }}
       previous-file: ${{ inputs.previous-file }}
     secrets:
@@ -72,7 +69,7 @@ jobs:
     with:
       depth: ${{ fromJson(inputs.depth) }}
       max-depth: ${{ fromJson(inputs.max-depth) }}
-      website-url: ${{ env.TESTDRIVER_WEBSITE }}
+      website-url: ${{ inputs.website-url }}
       base-branch: ${{ needs.generate-exploratory.outputs.pr-branch }}
     secrets:
       TESTDRIVER_API_KEY: ${{ secrets.TESTDRIVER_API_KEY }}
