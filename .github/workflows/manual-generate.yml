@@ -22,7 +22,7 @@ jobs:
     uses: ./.github/workflows/generate.yml
     with:
       dispatchId: manual-${{ github.run_id }}
-      depth: ${{ fromJson(input.depth) }}
+      depth: ${{ fromJson(inputs.depth) }}
       max-depth: ${{ fromJson(inputs.max-depth) }}
     secrets:
       TESTDRIVER_API_KEY: ${{ secrets.TESTDRIVER_API_KEY }}
