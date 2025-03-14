@@ -24,7 +24,7 @@ jobs:
       dispatchId: manual-${{ github.run_id }}
       depth: ${{ fromJson(inputs.depth) }}
       max-depth: ${{ fromJson(inputs.max-depth) }}
-      website-url: ${{ fromJson(inputs.website-url) }}
+      website-url: ${{ inputs.website-url }}
     secrets:
       TESTDRIVER_API_KEY: ${{ secrets.TESTDRIVER_API_KEY }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
