@@ -17,6 +17,9 @@ on:
       max-depth:
         type: number
         default: 1
+      website-url:
+        type: string
+        default: ${{ vars.TESTDRIVER_WEBSITE }}
       previous-file:
         type: string
         description: Previous test yaml file to use as a base
@@ -36,7 +39,7 @@ jobs:
     with:
       depth: ${{ fromJson(inputs.depth) }}
       max-depth: ${{ fromJson(inputs.max-depth) }}
-      website-url: ${{ vars.TESTDRIVER_WEBSITE }}
+      website-url: ${{ inputs.website-url }}
       base-branch: ${{ github.ref_name }}
       previous-file: ${{ inputs.previous-file }}
     secrets:
@@ -51,7 +54,7 @@ jobs:
     with:
       depth: ${{ fromJson(inputs.depth) }}
       max-depth: ${{ fromJson(inputs.max-depth) }}
-      website-url: ${{ vars.TESTDRIVER_WEBSITE }}
+      website-url: ${{ inputs.website-url }}
       base-branch: ${{ needs.generate-exploratory.outputs.pr-branch }}
     secrets:
       TESTDRIVER_API_KEY: ${{ secrets.TESTDRIVER_API_KEY }}
