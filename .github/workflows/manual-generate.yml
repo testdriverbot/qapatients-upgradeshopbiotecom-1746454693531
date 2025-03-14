@@ -9,9 +9,6 @@ on:
       max-depth:
         type: number
         default: 1
-      previous-file:
-        type: string
-        description: Previous test yaml file to use as a base
       website-url:
         type: string
         default: "https://kzmin4o8zlrumvqikugo.lite.vusercontent.net/login"
@@ -28,7 +25,6 @@ jobs:
       depth: ${{ inputs.depth }}
       max-depth: ${{ inputs.max-depth }}
       base-branch: ${{ github.ref_name }}
-      previous-file: ${{ inputs.previous-file }}
     secrets:
       TESTDRIVER_API_KEY: ${{ secrets.TESTDRIVER_API_KEY }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
