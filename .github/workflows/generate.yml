@@ -19,7 +19,6 @@ on:
         default: 1
       website-url:
         type: string
-        default: ${{ vars.TESTDRIVER_WEBSITE }}
       previous-file:
         type: string
         description: Previous test yaml file to use as a base
@@ -36,10 +35,12 @@ on:
         default: 1
       website-url:
         type: string
-        default: ${{ vars.TESTDRIVER_WEBSITE }}
       previous-file:
         type: string
         description: Previous test yaml file to use as a base
+
+env:
+  TESTDRIVER_WEBSITE: ${{ inputs.website-url && inputs.website-url || vars.TESTDRIVER_WEBSITE }}
 
 jobs:
   match-dispatchId:
@@ -56,7 +57,7 @@ jobs:
     with:
       depth: ${{ fromJson(inputs.depth) }}
       max-depth: ${{ fromJson(inputs.max-depth) }}
-      website-url: ${{ inputs.website-url }}
+      website-url: ${{ env.TESTDRIVER_WEBSITE }}
       base-branch: ${{ github.ref_name }}
       previous-file: ${{ inputs.previous-file }}
     secrets:
@@ -71,7 +72,7 @@ jobs:
     with:
       depth: ${{ fromJson(inputs.depth) }}
       max-depth: ${{ fromJson(inputs.max-depth) }}
-      website-url: ${{ inputs.website-url }}
+      website-url: ${{ env.TESTDRIVER_WEBSITE }}
       base-branch: ${{ needs.generate-exploratory.outputs.pr-branch }}
     secrets:
       TESTDRIVER_API_KEY: ${{ secrets.TESTDRIVER_API_KEY }}
