@@ -38,6 +38,11 @@ on:
       previous-file:
         type: string
         description: Previous test yaml file to use as a base
+    secrets:
+      TESTDRIVER_API_KEY:
+        required: true
+      GH_TOKEN:
+        required: true
 
 jobs:
   match-dispatchId:
