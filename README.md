@@ -22,7 +22,7 @@ Next, [create a GitHub secret](https://docs.github.com/en/actions/writing-workfl
 
 > TestDriver is currently in limited private beta. [Apply for an  API key here](https://o9w85nshvub.typeform.com/to/llG1wNkE).
 
-In the forked repository, [add a GitHub variable](https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#creating-configuration-variables-for-an-environment) named `TESTDRIVER_WEBSITE`. The value should be the root domain of the website you want to test (ex `https://example.com`).
+In the forked repository, [add a GitHub variable](https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#creating-configuration-variables-for-an-environment) named `TESTDRIVER_WEBSITE` . The value should be the root domain of the website you want to test (e.g., `https://example.com`).
 
 ## Test Generation
 
