@@ -1,0 +1,9 @@
+version: 4.2.29
+session: 6818cdc5290e271807919f91
+steps:
+  - prompt: /run testdriver\login.yml
+    commands:
+      - command: run
+        file: testdriver\login.yml
+  - prompt: Focus the browser window.
+    commands: []
