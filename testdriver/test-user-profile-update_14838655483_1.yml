@@ -1,0 +1,21 @@
+version: 4.2.29
+session: 6818cde4290e271807919fa1
+steps:
+  - prompt: Focus the browser window.
+    commands:
+      - command: focus-application
+        name: Google Chrome
+      - command: hover-text
+        text: Never
+        description: option to dismiss the save password popup
+        action: click
+      - command: hover-text
+        text: MY ACCOUNT
+        description: user account menu in the top right corner of the webpage
+        action: click
+  - prompt: Navigate to the user profile page.
+    commands:
+      - command: hover-text
+        text: My Profile
+        description: profile option in the MY ACCOUNT dropdown
+        action: click
