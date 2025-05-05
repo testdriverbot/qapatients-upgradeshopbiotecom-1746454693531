@@ -1,0 +1,28 @@
+version: 4.2.29
+session: 6818cad2290e271807919f80
+steps:
+  - prompt: >-
+      login with username "bioteqatest+autotest@gmail.com" and password
+      "Biote123$"
+    commands:
+      - command: focus-application
+        name: Google Chrome
+      - command: hover-text
+        text: LOG IN
+        description: login option at the top right of the webpage
+        action: click
+      - command: hover-text
+        text: Email Address
+        description: email input field in the login form
+        action: click
+      - command: type
+        text: bioteqatest+autotest@gmail.com
+      - command: hover-text
+        text: Password
+        description: password input field in the login form
+        action: click
+      - command: type
+        text: Biote123$
+      - command: press-keys
+        keys:
+          - enter
