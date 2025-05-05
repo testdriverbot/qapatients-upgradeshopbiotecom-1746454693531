@@ -1,0 +1,21 @@
+version: 4.2.29
+session: 6818cdc3290e271807919f8f
+steps:
+  - prompt: Assert that the promotional banner is displayed on the homepage.
+    commands:
+      - command: hover-text
+        text: biote
+        description: biote logo at the top of the page
+        action: click
+      - command: assert
+        expect: the promotional banner is displayed on the homepage
+  - prompt: Click on the promotional banner.
+    commands:
+      - command: hover-text
+        text: SHOP NOW
+        description: shop now button on the promotional banner
+        action: click
+  - prompt: Assert that the user is redirected to the correct promotional page.
+    commands:
+      - command: assert
+        expect: the Iron+ product page is displayed
