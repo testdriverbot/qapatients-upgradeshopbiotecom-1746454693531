@@ -1,0 +1,53 @@
+version: 4.2.29
+session: 6818cdc390973e9f58115cfb
+steps:
+  - prompt: /run testdriver\login.yml
+    commands:
+      - command: run
+        file: testdriver\login.yml
+  - prompt: Focus the browser window.
+    commands:
+      - command: hover-text
+        text: Never
+        description: never save password option in the popup
+        action: click
+      - command: hover-text
+        text: MY ACCOUNT
+        description: my account dropdown in the website header
+        action: click
+  - prompt: Navigate to the contact page.
+    commands:
+      - command: scroll-until-text
+        text: Contact Us
+        direction: down
+        method: keyboard
+      - command: hover-text
+        text: Contact Us
+        description: contact link in the website footer
+        action: click
+  - prompt: Fill in the contact form fields with test data.
+    commands:
+      - command: hover-text
+        text: Name
+        description: label for the name input field
+        action: click
+      - command: type
+        text: John Doe
+      - command: hover-text
+        text: Email
+        description: label for the email input field
+        action: click
+      - command: type
+        text: johndoe@example.com
+      - command: hover-text
+        text: Phone Number
+        description: label for the phone number input field
+        action: click
+      - command: type
+        text: 1234567890
+      - command: hover-text
+        text: What's on your mind?
+        description: label for the message input field
+        action: click
+      - command: type
+        text: This is a test message.
